@@ -1,0 +1,23 @@
+server:
+  port: 9001
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/auth_server?useSSL=true
+    username: root
+    password: muyangren1234
+  main:
+    allow-bean-definition-overriding: true # 这个表示允许我们覆盖OAuth2放在容器中的bean对象，一定要配置
+  redis:
+    host: 192.168.13.63
+    port: 32079
+    password: intellif
+    database: 2
+
+mybatis:
+  type-aliases-package: com.example.mapper
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    com.example: debug
