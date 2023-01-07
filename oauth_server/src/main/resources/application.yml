@@ -3,21 +3,27 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/auth_server?useSSL=true
+    url: jdbc:mysql://localhost:3306/auth_server?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
     username: root
-    password: muyangren1234
+    password: 123456
   main:
     allow-bean-definition-overriding: true # 这个表示允许我们覆盖OAuth2放在容器中的bean对象，一定要配置
   redis:
-    host: 192.168.13.63
-    port: 32079
-    password: intellif
-    database: 2
+    host: localhost
+    port: 6379
+    database: 0
 
-mybatis:
-  type-aliases-package: com.example.mapper
-  configuration:
-    map-underscore-to-camel-case: true
+  flyway:
+    enabled: true
+    encoding: UTF-8
+    locations: [ 'classpath:db/migration' ]
+    url: jdbc:mysql://localhost:3306/auth_server?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true
+    user: root
+    password: 123456
+
+mybatis-plus:
+  config-location: classpath:mybatis/mybatis.cfg.xml
+  mapper-locations: classpath\:mybatis/mapper/*.xml
 logging:
   level:
     com.example: debug

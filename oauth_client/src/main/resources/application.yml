@@ -1,0 +1,20 @@
+server:
+  port: 9002
+  # 防止cookie 冲突导致验证不通过
+  servlet:
+    session:
+      cookie:
+        name: OAUTH2-CLIENT-SESSIONID01
+  # 授权地址
+oauth2-server-url: http://localhost:9001
+
+security:
+  oauth2:
+    client:
+      client-id: admin
+      client-secret: 112233
+      user-authorization-uri: ${oauth2-server-url}/oauth/authorize
+      access-token-uri: ${oauth2-server-url}/oauth/token
+    resource:
+      jwt:
+        key-uri: ${oauth2-server-url}/oauth/token_key

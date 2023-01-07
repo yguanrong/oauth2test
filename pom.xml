@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>oauth_resource</module>
         <module>oauth_server</module>
+        <module>oauth_client</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

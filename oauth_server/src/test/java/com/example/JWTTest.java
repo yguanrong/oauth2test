@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.Base64Codec;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 
@@ -79,6 +80,17 @@ public class JWTTest {
         System.out.println("签发时间 = " + claims.getIssuedAt());
         System.out.println("过期时间 = " + claims.getExpiration());
         System.out.println("当前时间 = " + new Date());
+
+    }
+
+
+    @Test
+    public void testPassword(){
+
+        String test = "123456";
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encode = passwordEncoder.encode(test);
+        System.out.println("encode = " + encode);
 
     }
 }
