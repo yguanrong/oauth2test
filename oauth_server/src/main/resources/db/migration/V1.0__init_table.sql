@@ -20,8 +20,8 @@ CREATE TABLE IF not EXISTS `tb_sys_client` (
 
 CREATE TABLE IF not EXISTS `oauth_refresh_token` (
        `token_id` varchar(255) DEFAULT NULL,
-       `token` text,
-       `authentication` text
+       `token` mediumblob,
+       `authentication` mediumblob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '刷新令牌表';
 
 
@@ -31,7 +31,7 @@ CREATE TABLE IF not EXISTS `oauth_access_token` (
   `authentication_id` varchar(255) NOT NULL,
   `user_name` varchar(255) DEFAULT NULL,
   `client_id` varchar(255) DEFAULT NULL,
-  `authentication` text,
+  `authentication` mediumblob,
   `refresh_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`authentication_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -65,7 +65,7 @@ CREATE TABLE IF not EXISTS `sys_user` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `username` varchar(32) NOT NULL,
     `password` varchar(128) NOT NULL,
-    `status` int(11) not null DEFAULT 1 COMMENT '1启用，0停用',
+    `status` int(11) not null DEFAULT 1 comment '1 启用，0禁用',
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -91,13 +91,13 @@ CREATE TABLE IF not EXISTS `oauth_approvals` (
 
 CREATE TABLE IF not EXISTS `oauth_code` (
       `code` varchar(255) DEFAULT NULL,
-      `authentication` text
+      `authentication` mediumblob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '授权码记录表';
 
 
 CREATE TABLE IF not EXISTS `oauth_client_token` (
   `token_id` varchar(255) DEFAULT NULL,
-  `token` text,
+  `token` mediumblob,
   `authentication_id` varchar(255) NOT NULL,
   `user_name` varchar(255) DEFAULT NULL,
   `client_id` varchar(255) DEFAULT NULL,
