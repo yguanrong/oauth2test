@@ -20,9 +20,9 @@ CREATE TABLE IF not EXISTS `tb_sys_client` (
 
 CREATE TABLE IF not EXISTS `oauth_refresh_token` (
        `token_id` varchar(255) DEFAULT NULL,
-       `token` mediumblob,
-       `authentication` mediumblob
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+       `token` text,
+       `authentication` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '刷新令牌表';
 
 
 CREATE TABLE IF not EXISTS `oauth_access_token` (
@@ -31,7 +31,7 @@ CREATE TABLE IF not EXISTS `oauth_access_token` (
   `authentication_id` varchar(255) NOT NULL,
   `user_name` varchar(255) DEFAULT NULL,
   `client_id` varchar(255) DEFAULT NULL,
-  `authentication` mediumblob,
+  `authentication` text,
   `refresh_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`authentication_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -50,7 +50,7 @@ CREATE TABLE IF not EXISTS `oauth_client_details` (
     `additional_information` varchar(4096) COLLATE utf8_unicode_ci DEFAULT NULL,
     `autoapprove` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
     PRIMARY KEY (`client_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci comment '客户端记录表';
 
 
 CREATE TABLE IF not EXISTS `sys_role` (
@@ -63,11 +63,11 @@ CREATE TABLE IF not EXISTS `sys_role` (
 
 CREATE TABLE IF not EXISTS `sys_user` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    `user_name` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-    `password` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
-    `status` int(11) DEFAULT NULL,
+    `username` varchar(32) NOT NULL,
+    `password` varchar(128) NOT NULL,
+    `status` int(11) not null DEFAULT 1 COMMENT '1启用，0停用',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`user_name`)
+    UNIQUE KEY `name` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -86,18 +86,18 @@ CREATE TABLE IF not EXISTS `oauth_approvals` (
     `status` varchar(10) DEFAULT NULL,
     `expiresAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `lastModifiedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '授权记录表';
 
 
 CREATE TABLE IF not EXISTS `oauth_code` (
-                              `code` varchar(255) DEFAULT NULL,
-                              `authentication` mediumblob
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+      `code` varchar(255) DEFAULT NULL,
+      `authentication` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '授权码记录表';
 
 
 CREATE TABLE IF not EXISTS `oauth_client_token` (
   `token_id` varchar(255) DEFAULT NULL,
-  `token` mediumblob,
+  `token` text,
   `authentication_id` varchar(255) NOT NULL,
   `user_name` varchar(255) DEFAULT NULL,
   `client_id` varchar(255) DEFAULT NULL,

@@ -87,7 +87,7 @@ public class JWTTest {
     @Test
     public void testPassword(){
 
-        String test = "123456";
+        String test = "112233";
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encode = passwordEncoder.encode(test);
         System.out.println("encode = " + encode);

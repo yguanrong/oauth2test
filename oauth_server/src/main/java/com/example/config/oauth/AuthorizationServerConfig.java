@@ -123,6 +123,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         List<TokenGranter> tokenGranters = getDefaultTokenGranters(endpoints);
 
         endpoints.authenticationManager(authenticationManager)
+                // 自定义用户表
                 .userDetailsService(userService)
                 // 配置jwt存储令牌store
                 .tokenStore(jwtTokenStore)
