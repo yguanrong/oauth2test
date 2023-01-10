@@ -29,5 +29,26 @@ curl --location --request POST 'http://localhost:9001/oauth/token' \
 --data-urlencode 'client_id=admin' \
 --data-urlencode 'scope=all'
 
+其中header的Authorization 的值是 Basic + base64Encode(clientId:clientSecret)
 
 ![image](https://user-images.githubusercontent.com/41421888/211306550-eeaf46be-6a53-4e6b-bb16-19d12d804daa.png)
+
+
+# 密码模式
+
+1、使用postMan或者apifox调用获取token：/oauth/token
+
+curl --location --request POST 'http://localhost:9001/oauth/token' \
+--header 'User-Agent: Apifox/1.0.0 (https://www.apifox.cn)' \
+--header 'Authorization: Basic YWRtaW46MTEyMjMz' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'username=admin' \
+--data-urlencode 'password=123456' \
+--data-urlencode 'scope=all'
+
+其中header的Authorization 的值是 Basic + base64Encode(clientId:clientSecret)
+
+![image](https://user-images.githubusercontent.com/41421888/211451388-5e7f8140-7cf7-48b5-8b55-4a4a04140cea.png)
+
+
+
