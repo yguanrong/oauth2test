@@ -26,13 +26,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_user")
+@TableName("t_user")
 public class SysUser extends Model<SysUser> implements UserDetails {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private long id;
 
     private String username;
 
@@ -46,8 +46,6 @@ public class SysUser extends Model<SysUser> implements UserDetails {
      */
     private Integer status;
 
-    @TableField(exist = false)
-    private List<GrantedAuthority> grantedAuthorities;
 
 
     @Override
@@ -57,7 +55,7 @@ public class SysUser extends Model<SysUser> implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return grantedAuthorities;
+        return null;
     }
 
     @Override

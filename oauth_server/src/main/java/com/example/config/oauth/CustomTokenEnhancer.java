@@ -1,8 +1,17 @@
 package com.example.config.oauth;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.dto.Operation;
+import com.example.dto.UserArea;
+import com.example.dto.UserInfo;
+import com.example.dto.UserRoleInfo;
 import com.example.entity.SysUser;
+import com.example.mapper.SysUserMapper;
+import com.example.service.UserService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +21,9 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
+import javax.swing.tree.TreeNode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +38,11 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     private StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    SysUserMapper userMapper;
+
+    @Autowired
+    UserService userService;
 
     public CustomTokenEnhancer(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
@@ -34,29 +50,69 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
-        // 增强token内容
-        Map<String,Object> info = new HashMap<>();
-        info.put("enhancer","enhance info");
-        ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
-
         long expireTime = oAuth2AccessToken.getExpiration().getTime() - System.currentTimeMillis();
 
-        // 把token保存到redis
-        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+        // 获取用户授权信息
+        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
+
+        // 把token：UserInfo 保存到redis
+        storeTokenUserInfoToRedis(oAuth2AccessToken,oAuth2Authentication, expireTime, userInfo);
+
+        // token增强器，增强内容只存在redis中，不返回到前端
+        Map<String,Object> info = new HashMap<>();
+        userInfo.setOperationList(null);
+        info.put("userInfo",userInfo);
+        ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
+
+        return oAuth2AccessToken;
+    }
+
+    /**
+     * 保存token和用户信息到redis
+     * @param oAuth2Authentication
+     * @param expireTime
+     * @param userInfo
+     */
+    private void storeTokenUserInfoToRedis(OAuth2AccessToken oAuth2AccessToken,OAuth2Authentication oAuth2Authentication, long expireTime, UserInfo userInfo) {
+
         String token = oAuth2AccessToken.getValue();
         Gson gson = new Gson();
-        String data = gson.toJson(user);
+        String data = gson.toJson(userInfo);
         ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
         Boolean handle = valueOperations.setIfAbsent(token, data);
-        log.info("存储用户登录信息，账号：{}，token={},success={}", user.getUsername(),token, handle);
-        if (handle) {
+        log.info("存储用户登录信息，账号：{}，token={},success={}", userInfo.getUserVo().getUsername(), token, handle);
+
+        if (handle!= null && handle) {
             //存储用户和token的关系
             OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
-            String key = user.getUsername() + "_" + 0L + "_" +authorizationRequest.getClientId();
+            String key = userInfo.getUserVo().getUsername() + "_" + 0L + "_" +authorizationRequest.getClientId();
             valueOperations.set(key, token, expireTime, TimeUnit.MILLISECONDS);
             //存储token对应的用户信息
             valueOperations.getOperations().expire(token, expireTime, TimeUnit.MILLISECONDS);
         }
-        return oAuth2AccessToken;
     }
+
+    /**
+     * 获取用户权限模块等消息，等信息
+     * @param oAuth2Authentication
+     * @return
+     */
+    private UserInfo getUserAuthInfo(OAuth2Authentication oAuth2Authentication){
+        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+        OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserVo(user);
+
+//        List<UserRoleInfo> userRoleInfo = userService.getUserRoleInfo(user.getId(), authorizationRequest.getClientId());
+//        userInfo.setUserRoleInfo(userRoleInfo);
+//        List<TreeNode> oauthResources = userService.getOauthResources(user.getId(), authorizationRequest.getClientId());
+//        userInfo.setOauthResources(oauthResources);
+//        List<Operation> operationList = userService.getOperationList(user.getId(), authorizationRequest.getClientId());
+//        userInfo.setOperationList(operationList);
+//        List<UserArea> userAreaList = userService.getUserAreaList(user.getId(), authorizationRequest.getClientId());
+//        userInfo.setUserAreaList(userAreaList);
+
+        return userInfo;
+    }
+
 }
