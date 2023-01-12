@@ -1,28 +1,18 @@
 package com.example.config.oauth;
 
-import com.example.handle.MyAuthenticationFailureHandler;
-import com.example.handle.MyAuthenticationSuccessHandler;
-import com.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 import javax.sql.DataSource;
 
@@ -36,6 +26,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired
     DataSource dataSource;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 密码的加密方式
@@ -76,6 +69,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         return new JdbcAuthorizationCodeServices(dataSource);
     }
 
+    /**
+     * token 内容增强
+     * @return
+     */
+    @Bean
+    public CustomTokenEnhancer customTokenEnhancer(){
+        return new CustomTokenEnhancer(stringRedisTemplate);
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 //        //表单提交
@@ -98,7 +100,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 // login.html 不需要认证
                 .antMatchers("/oauth/**","/login/**","/logout/**").permitAll()
                 // 所有请求都需要认证，必须登录之后才能访问
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 .and()
                 .formLogin()
                 .permitAll();

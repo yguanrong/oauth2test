@@ -65,6 +65,8 @@ CREATE TABLE IF not EXISTS `sys_user` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `username` varchar(32) NOT NULL,
     `password` varchar(128) NOT NULL,
+    `phone` varchar(128) default NULL,
+    `e_mail` varchar(128) default NULL,
     `status` int(11) not null DEFAULT 1 comment '1 启用，0禁用',
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`username`)

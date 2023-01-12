@@ -1,15 +1,20 @@
 package com.example;
 
+import com.example.entity.SysUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.Base64Codec;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by YangGuanRong
@@ -17,6 +22,13 @@ import java.util.Date;
  */
 @SpringBootTest
 public class JWTTest {
+
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    private static final String service_key = "ifaas-hotel-robot-platform:";
+
+    private static final String monitor_key = service_key + "monitor_now";
 
     /**
      * 创建token
@@ -83,14 +95,38 @@ public class JWTTest {
 
     }
 
+    HashOperations<String,Integer,SysUser> hashOperations ;
+
+    public void getHashOperation(){
+        if (hashOperations == null){
+            hashOperations = redisTemplate.opsForHash();
+        }
+    }
 
     @Test
     public void testPassword(){
 
-        String test = "112233";
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encode = passwordEncoder.encode(test);
-        System.out.println("encode = " + encode);
+        getHashOperation();
+
+        for (int i = 1; i < 6; i++) {
+            SysUser user = new SysUser();
+            user.setId(i);
+            user.setUsername("name"+i);
+            hashOperations.put(monitor_key,i,user);
+        }
+
+        SysUser o = hashOperations.get(monitor_key, 2);
+        System.out.println("o = " + o);
+
+        o.setPassword("666");
+
+        hashOperations.put(monitor_key,2,o);
+
+        Map<Integer, SysUser> entries = hashOperations.entries(monitor_key);
+        entries.forEach((k,v)->{
+            System.out.println("k = " + k);
+            System.out.println("v = " + v);
+        });
 
     }
 }

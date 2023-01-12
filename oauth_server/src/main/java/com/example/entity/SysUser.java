@@ -38,6 +38,9 @@ public class SysUser extends Model<SysUser> implements UserDetails {
 
     private String password;
 
+    private String phone;
+
+    private String eMail;
     /**
      * 0停用，1启用
      */

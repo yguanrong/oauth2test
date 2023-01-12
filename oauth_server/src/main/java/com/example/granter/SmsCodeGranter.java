@@ -1,9 +1,9 @@
 package com.example.granter;
 
-import com.example.granter.auth.TelePhoneAuthenticationToken;
+import com.example.entity.SysUser;
+import com.example.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.*;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
@@ -14,8 +14,8 @@ import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
+ * 自定义短信验证码授权登录
  *
- * @Author: torlesse-liang
  * @Date: 2022/03/23/21:05
  * @Description: SmsCodeGranter
  */
@@ -26,10 +26,14 @@ public class SmsCodeGranter extends AbstractTokenGranter {
 
     protected final AuthenticationManager authenticationManager;
 
+    private UserService userService;
+
     public SmsCodeGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices,
-                          ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+                          ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory,
+                          UserService userService) {
         super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
         this.authenticationManager = authenticationManager;
+        this.userService = userService;
     }
 
     @Override
@@ -42,32 +46,17 @@ public class SmsCodeGranter extends AbstractTokenGranter {
         if(!code.equals("123123")){
             throw new InvalidGrantException("短信验证码填写错误.");
         }
-        // 根据手机号码查询用户信息：根据实际情况操作 这里只做演示没有数据库访问操作
-        //模拟查询出来的user
-        String user = "torlesse";
+        // 根据手机号码查询用户信息
+        SysUser user = userService.queryUserByPhone(telephone);
         if (user == null) {
             throw new InvalidGrantException("手机号码填写错误.");
         }
 
-        Authentication userAuth = new TelePhoneAuthenticationToken(user, "123456", telephone, code);
-        ((AbstractAuthenticationToken) userAuth).setDetails(parameters);
+        AbstractAuthenticationToken userAuth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
-        try {
-            userAuth = this.authenticationManager.authenticate(userAuth);
-        } catch (AccountStatusException var8) {
-            throw new InvalidGrantException("当前用户已经被锁定,请联系客服.");
-        } catch (BadCredentialsException var9) {
-            throw new InvalidGrantException("用户信息查询异常,请确认是否注册.");
-        } catch (InternalAuthenticationServiceException var10) {
-            throw new InvalidGrantException("验证码校验失败.");
-        }
+        OAuth2Request storedOAuth2Request = this.getRequestFactory().createOAuth2Request(client, tokenRequest);
+        return new OAuth2Authentication(storedOAuth2Request, userAuth);
 
-        if (userAuth != null && userAuth.isAuthenticated()) {
-            OAuth2Request storedOAuth2Request = this.getRequestFactory().createOAuth2Request(client, tokenRequest);
-            return new OAuth2Authentication(storedOAuth2Request, userAuth);
-        } else {
-            throw new InvalidGrantException("Could not authenticate user: " + telephone);
-        }
 
     }
 }

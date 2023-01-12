@@ -47,4 +47,18 @@ public class UserServiceImpl implements UserService {
 
         return user;
     }
+
+    @Override
+    public SysUser queryUserByPhone(String phone) {
+
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getPhone,phone);
+
+        List<SysUser> sysUsers = userMapper.selectList(queryWrapper);
+
+        if (CollectionUtils.isEmpty(sysUsers)){
+            return null;
+        }
+        return sysUsers.get(0);
+    }
 }
