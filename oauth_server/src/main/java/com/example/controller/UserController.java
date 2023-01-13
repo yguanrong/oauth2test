@@ -1,6 +1,8 @@
 package com.example.controller;
 
 import io.jsonwebtoken.Jwts;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import java.nio.charset.StandardCharsets;
  */
 @RestController
 @RequestMapping("/user")
+@Api("UserController")
 public class UserController {
 
     /**
@@ -25,6 +28,7 @@ public class UserController {
      * @return
      */
     @GetMapping(value = "/getCurrentUser")
+    @ApiOperation(value = "获取当前用户信息",httpMethod = "GET")
     public Object getCurrentUser(Authentication authentication, HttpServletRequest httpServletRequest) {
         String head = httpServletRequest.getHeader("Authorization");
         String token = head.substring(head.indexOf("bearer") + 7);

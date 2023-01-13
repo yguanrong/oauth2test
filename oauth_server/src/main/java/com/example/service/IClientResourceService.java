@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.entity.ClientResource;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.entity.OauthClientDetails;
 
 /**
  * <p>
@@ -12,5 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2023-01-12
  */
 public interface IClientResourceService extends IService<ClientResource> {
+
+    ClientResource create(ClientResource clientResource);
+
+    void delete(ClientResource clientResource);
 
 }

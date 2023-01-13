@@ -20,6 +20,7 @@ CREATE TABLE IF not EXISTS `oauth_client_details` (
     `client_id` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
     `resource_ids` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
     `client_secret` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+    `client_secret_mw` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
     `scope` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
     `authorized_grant_types` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
     `web_server_redirect_uri` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
