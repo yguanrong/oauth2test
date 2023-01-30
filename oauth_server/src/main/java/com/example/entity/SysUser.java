@@ -46,7 +46,11 @@ public class SysUser extends Model<SysUser> implements UserDetails {
      */
     private Integer status;
 
-
+    /**
+     * 0停用，1启用
+     */
+    @TableField(exist = false)
+    private String clientId;
 
     @Override
     protected Serializable pkVal() {

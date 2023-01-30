@@ -18,7 +18,7 @@ public class RedisConfig {
     private StringRedisTemplate stringRedisTemplate;
 
     @Bean("redisTokenStore")
-    public TokenStore redisTokenStore(){
+    public CustomRedisTokenStore redisTokenStore(){
 
         return new CustomRedisTokenStore(stringRedisTemplate);
     }

@@ -2,6 +2,7 @@ package com.example.config.oauth;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.example.config.PropertyBasedInterfaceMarshal;
+import com.example.entity.SysUser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -21,6 +22,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.DefaultAuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.JdkSerializationStrategy;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStoreSerializationStrategy;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -47,7 +50,8 @@ public class CustomRedisTokenStore implements TokenStore {
     private static final String UNAME_TO_ACCESS = "uname_to_access:";
 
 
-    private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
+    private AuthenticationKeyGenerator authenticationKeyGenerator = new CustomAuthenticationKeyGenerator();
+    private RedisTokenStoreSerializationStrategy serializationStrategy = new JdkSerializationStrategy();
 
     private StringRedisTemplate redisTemplate;
 
@@ -61,6 +65,10 @@ public class CustomRedisTokenStore implements TokenStore {
             .registerTypeAdapter(GrantedAuthority.class, new PropertyBasedInterfaceMarshal())
             .registerTypeAdapter(UserDetailsService.class, new PropertyBasedInterfaceMarshal())
             .create();
+
+    private OAuth2Authentication deserializeAuthentication(byte[] bytes) {
+        return (OAuth2Authentication)this.serializationStrategy.deserialize(bytes, OAuth2Authentication.class);
+    }
 
     public CustomRedisTokenStore(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -271,8 +279,12 @@ public class CustomRedisTokenStore implements TokenStore {
      * @return
      */
     private static String getApprovalKey(OAuth2Authentication authentication) {
-        String userName = authentication.getUserAuthentication() == null ? "" : authentication.getUserAuthentication()
-                .getName();
+        String userName = "";
+        if (authentication.getUserAuthentication() != null){
+            SysUser sysUser = JSONObject.parseObject(JSONObject.toJSONString(authentication.getUserAuthentication().getPrincipal()),SysUser.class);
+            userName = sysUser.getUsername();
+        }
+
         return getApprovalKey(authentication.getOAuth2Request().getClientId(), userName);
     }
 
@@ -346,7 +358,8 @@ public class CustomRedisTokenStore implements TokenStore {
                 byte[] access = (byte[]) results.get(0);
                 byte[] auth = (byte[]) results.get(1);
 
-                OAuth2Authentication authentication = gson.fromJson(new String(auth), new TypeToken<OAuth2Authentication>() {}.getType());
+                String s = new String(auth);
+                OAuth2Authentication authentication = gson.fromJson(s, new TypeToken<OAuth2Authentication>() {}.getType());
                 if (authentication != null) {
                     String key = authenticationKeyGenerator.extractKey(authentication);
 

@@ -3,7 +3,6 @@ package com.example.dto;
 import com.example.entity.SysUser;
 import lombok.Data;
 
-import javax.swing.tree.TreeNode;
 import java.io.Serializable;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class UserInfo implements Serializable {
     /**
      * 有权限的资源树结构
      */
-    private List<TreeNode> oauthResources;
+    private Object oauthResources;
 
     /**
      * 数据权限（用户和区域）

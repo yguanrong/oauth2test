@@ -49,8 +49,6 @@ public class CustomTokenEnhancer implements TokenEnhancer {
     @Autowired
     UserService userService;
 
-    @Resource(name = "taskExecutors")
-    private ThreadPoolTaskExecutor taskExecutor;
 
     public CustomTokenEnhancer(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
@@ -82,7 +80,9 @@ public class CustomTokenEnhancer implements TokenEnhancer {
      * @param userInfo
      */
     private void storeTokenUserInfoToRedis(OAuth2AccessToken oAuth2AccessToken,OAuth2Authentication oAuth2Authentication, long expireTime, UserInfo userInfo) {
+        OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
 
+        userInfo.getUserVo().setClientId(authorizationRequest.getClientId());
         String token = oAuth2AccessToken.getValue();
         Gson gson = new Gson();
         String data = gson.toJson(userInfo);
@@ -92,7 +92,6 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
         if (handle!= null && handle) {
             //存储用户和token的关系
-            OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
             String key = userInfo.getUserVo().getUsername() + "_" + 0L + "_" +authorizationRequest.getClientId();
             valueOperations.set(key, token, expireTime, TimeUnit.MILLISECONDS);
             //存储token对应的用户信息
