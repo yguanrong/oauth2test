@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -21,10 +22,14 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
+import javax.annotation.Resource;
 import javax.swing.tree.TreeNode;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,6 +48,9 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     @Autowired
     UserService userService;
+
+    @Resource(name = "taskExecutors")
+    private ThreadPoolTaskExecutor taskExecutor;
 
     public CustomTokenEnhancer(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
@@ -103,14 +111,12 @@ public class CustomTokenEnhancer implements TokenEnhancer {
         UserInfo userInfo = new UserInfo();
         userInfo.setUserVo(user);
 
-//        List<UserRoleInfo> userRoleInfo = userService.getUserRoleInfo(user.getId(), authorizationRequest.getClientId());
-//        userInfo.setUserRoleInfo(userRoleInfo);
-//        List<TreeNode> oauthResources = userService.getOauthResources(user.getId(), authorizationRequest.getClientId());
-//        userInfo.setOauthResources(oauthResources);
-//        List<Operation> operationList = userService.getOperationList(user.getId(), authorizationRequest.getClientId());
-//        userInfo.setOperationList(operationList);
-//        List<UserArea> userAreaList = userService.getUserAreaList(user.getId(), authorizationRequest.getClientId());
-//        userInfo.setUserAreaList(userAreaList);
+        // 获取用户权限信息
+        UserInfo authInfo = userService.getUserAuthInfo(user.getId(), authorizationRequest.getClientId());
+        userInfo.setUserRoleInfo(authInfo.getUserRoleInfo());
+        userInfo.setOauthResources(authInfo.getOauthResources());
+        userInfo.setOperationList(authInfo.getOperationList());
+        userInfo.setUserAreaList(authInfo.getUserAreaList());
 
         return userInfo;
     }

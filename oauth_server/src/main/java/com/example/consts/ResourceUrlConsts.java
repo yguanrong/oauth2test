@@ -21,4 +21,9 @@ public interface ResourceUrlConsts {
      * 查询用户角色的url
      */
     String USER_AREA_URL = "/resource/area";
+
+    /**
+     * 查询用户资源的url
+     */
+    String AUTH_INFO_URL = "/resource/authInfo";
 }

@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.dto.Operation;
 import com.example.dto.UserArea;
+import com.example.dto.UserInfo;
 import com.example.dto.UserRoleInfo;
 import com.example.entity.SysUser;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,5 +46,13 @@ public interface UserService extends UserDetailsService {
      * @return
      */
     List<UserArea> getUserAreaList(long userId,String clientId);
+
+    /**
+     * 返回当前平台的用户资源信息
+     * @param userId 用户id
+     * @param clientId 平台标识
+     * @return
+     */
+    UserInfo getUserAuthInfo(long userId, String clientId);
 
 }
