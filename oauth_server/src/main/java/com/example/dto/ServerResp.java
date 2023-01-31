@@ -89,4 +89,11 @@ public class ServerResp {
     public ServerResp(Object data) {
         this.data = data;
     }
+
+    public static ServerResp error(String respMessage){
+        ServerResp resp = new ServerResp();
+        resp.respMessage = respMessage;
+        resp.setRespCode(ERROR_CODE);
+        return resp;
+    }
 }

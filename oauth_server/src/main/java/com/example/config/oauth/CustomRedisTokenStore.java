@@ -46,8 +46,7 @@ public class CustomRedisTokenStore implements TokenStore {
     private static final String ACCESS_TO_REFRESH = "access_to_refresh:";
     private static final String REFRESH = "refresh:";
     private static final String REFRESH_TO_ACCESS = "refresh_to_access:";
-    private static final String CLIENT_ID_TO_ACCESS = "client_id_to_access:";
-    private static final String UNAME_TO_ACCESS = "uname_to_access:";
+//    private static final String UNAME_TO_ACCESS = "uname_to_access:";
 
 
     private AuthenticationKeyGenerator authenticationKeyGenerator = new CustomAuthenticationKeyGenerator();
@@ -229,8 +228,7 @@ public class CustomRedisTokenStore implements TokenStore {
             byte[] accessKey = (ACCESS + token.getValue()).getBytes();
             byte[] authKey = (AUTH + token.getValue()).getBytes();
             byte[] authToAccessKey = (AUTH_TO_ACCESS + authenticationKeyGenerator.extractKey(authentication)).getBytes();
-            byte[] approvalKey = (UNAME_TO_ACCESS + getApprovalKey(authentication)).getBytes();
-            byte[] clientId = (CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId()).getBytes();
+//            byte[] approvalKey = (UNAME_TO_ACCESS + getApprovalKey(authentication)).getBytes();
 
             try {
                 connection.openPipeline();
@@ -238,17 +236,15 @@ public class CustomRedisTokenStore implements TokenStore {
                 connection.set(authKey, serializedAuth);
                 connection.set(authToAccessKey, serializedAccessToken);
                 if (!authentication.isClientOnly()) {
-                    connection.sAdd(approvalKey, serializedAccessToken);
+//                    connection.sAdd(approvalKey, serializedAccessToken);
                 }
-                connection.sAdd(clientId, serializedAccessToken);
 
                 if (token.getExpiration() != null) {
                     int seconds = token.getExpiresIn();
                     connection.expire(accessKey, seconds);
                     connection.expire(authKey, seconds);
                     connection.expire(authToAccessKey, seconds);
-                    connection.expire(clientId, seconds);
-                    connection.expire(approvalKey, seconds);
+//                    connection.expire(approvalKey, seconds);
                 }
 
                 OAuth2RefreshToken refreshToken = token.getRefreshToken();
@@ -355,7 +351,7 @@ public class CustomRedisTokenStore implements TokenStore {
                 connection.del(accessToRefreshKey);
                 connection.del(authKey);
                 List<Object> results = connection.closePipeline();
-                byte[] access = (byte[]) results.get(0);
+//                byte[] access = (byte[]) results.get(0);
                 byte[] auth = (byte[]) results.get(1);
 
                 String s = new String(auth);
@@ -364,13 +360,11 @@ public class CustomRedisTokenStore implements TokenStore {
                     String key = authenticationKeyGenerator.extractKey(authentication);
 
                     byte[] authToAccessKey = (AUTH_TO_ACCESS + key).getBytes();
-                    byte[] uNameKey = (UNAME_TO_ACCESS + getApprovalKey(authentication)).getBytes();
-                    byte[] clientId = (CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId()).getBytes();
+//                    byte[] uNameKey = (UNAME_TO_ACCESS + getApprovalKey(authentication)).getBytes();
 
                     connection.openPipeline();
                     connection.del(authToAccessKey);
-                    connection.sRem(uNameKey, access);
-                    connection.sRem(clientId, access);
+//                    connection.sRem(uNameKey, access);
                     connection.del((ACCESS + key).getBytes());
                     connection.closePipeline();
                 }
@@ -501,8 +495,9 @@ public class CustomRedisTokenStore implements TokenStore {
     public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
         return redisTemplate.execute((RedisCallback<Collection<OAuth2AccessToken>>) connection -> {
 
-            byte[] approvalKey = (UNAME_TO_ACCESS + getApprovalKey(clientId, userName)).getBytes();
-            return getOAuth2AccessTokens(connection, approvalKey);
+//            byte[] approvalKey = (UNAME_TO_ACCESS + getApprovalKey(clientId, userName)).getBytes();
+//            return getOAuth2AccessTokens(connection, approvalKey);
+            return Collections.emptySet();
         });
     }
 
@@ -516,8 +511,9 @@ public class CustomRedisTokenStore implements TokenStore {
     public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
         return redisTemplate.execute((RedisCallback<Collection<OAuth2AccessToken>>) connection -> {
 
-            byte[] key = (CLIENT_ID_TO_ACCESS + clientId).getBytes();
-            return getOAuth2AccessTokens(connection, key);
+//            byte[] key = (CLIENT_ID_TO_ACCESS + clientId).getBytes();
+//            return getOAuth2AccessTokens(connection, key);
+            return Collections.emptySet();
         });
     }
 
@@ -610,8 +606,6 @@ public class CustomRedisTokenStore implements TokenStore {
         byte[] accessKey = (ACCESS + token).getBytes();
         byte[] authKey = (AUTH + token).getBytes();
         byte[] authToAccessKey = (AUTH_TO_ACCESS + authenticationKeyGenerator.extractKey(authentication)).getBytes();
-//        byte[] approvalKey = (UNAME_TO_ACCESS + getApprovalKey(authentication)).getBytes();
-//        byte[] clientId = (CLIENT_ID_TO_ACCESS + authentication.getOAuth2Request().getClientId()).getBytes();
 
         //重新设置过期时间
         Date newExpiration = new Date(System.currentTimeMillis() + expiredTime * 1000);
@@ -630,8 +624,6 @@ public class CustomRedisTokenStore implements TokenStore {
                 connection.expire(accessKey, expiredTime);
                 connection.expire(authKey, expiredTime);
                 connection.expire(authToAccessKey, expiredTime);
-//                connection.expire(clientId, expiredTime);
-//                connection.expire(approvalKey, expiredTime);
 
                 if (refreshToken != null && refreshToken.getValue() != null) {
                     byte[] refreshToAccessKey = (REFRESH_TO_ACCESS + accessToken.getRefreshToken().getValue()).getBytes();

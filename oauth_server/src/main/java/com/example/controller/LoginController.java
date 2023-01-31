@@ -3,6 +3,7 @@ package com.example.controller;
 
 import com.example.consts.ResourceUrlConsts;
 import com.example.dto.ServerResp;
+import com.example.dto.TokenParamDto;
 import com.example.service.LoginService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,6 +49,21 @@ public class LoginController {
                 return new ServerResp("缺少授权信息,退出登录失败", ServerResp.ERROR_CODE);
             }
             loginService.logout(token);
+            return new ServerResp();
+        } catch (Exception e) {
+            return new ServerResp("退出登录失败：" + e.getMessage(), ServerResp.ERROR_CODE);
+        }
+    }
+
+    /**
+     * 刷新token有效期
+     * @return
+     */
+    @PostMapping(value = "/refreshToken")
+    @ApiOperation(value = "刷新token有效期",httpMethod = "POST")
+    public ServerResp refreshToken(@RequestBody TokenParamDto tokenParamDto) {
+        try {
+            loginService.refreshToken(tokenParamDto);
             return new ServerResp();
         } catch (Exception e) {
             return new ServerResp("退出登录失败：" + e.getMessage(), ServerResp.ERROR_CODE);
