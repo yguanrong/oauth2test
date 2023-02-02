@@ -59,7 +59,7 @@ public class UserController {
      * 新增用户
      * @return
      */
-    @GetMapping(value = "/create")
+    @PostMapping(value = "/create")
     @ApiOperation(value = "新增用户",httpMethod = "POST")
     public ServerResp create(@RequestBody SysUser sysUser) {
         SysUser user= sysUserService.create(sysUser);
@@ -70,7 +70,7 @@ public class UserController {
      * 删除用户
      * @return
      */
-    @GetMapping(value = "/delete")
+    @PostMapping(value = "/delete")
     @ApiOperation(value = "删除用户",httpMethod = "POST")
     public ServerResp delete(@RequestBody SysUser sysUser) {
         sysUserService.delete(sysUser);
@@ -81,7 +81,7 @@ public class UserController {
      * 编辑用户
      * @return
      */
-    @GetMapping(value = "/update")
+    @PostMapping(value = "/update")
     @ApiOperation(value = "编辑用户",httpMethod = "POST")
     public ServerResp update(@RequestBody SysUser sysUser) {
         sysUserService.updateById(sysUser);

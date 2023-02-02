@@ -6,6 +6,7 @@ import com.example.entity.OauthClientDetails;
 import com.example.mapper.ClientResourceMapper;
 import com.example.service.IClientResourceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
  * @since 2023-01-12
  */
 @Service
+@Slf4j
 public class ClientResourceServiceImpl extends ServiceImpl<ClientResourceMapper, ClientResource> implements IClientResourceService {
 
     @Autowired
@@ -25,6 +27,7 @@ public class ClientResourceServiceImpl extends ServiceImpl<ClientResourceMapper,
     @Override
     public ClientResource create(ClientResource clientResource) {
         int insert = clientResourceMapper.insert(clientResource);
+        log.info("插入成功");
         return clientResource;
     }
 

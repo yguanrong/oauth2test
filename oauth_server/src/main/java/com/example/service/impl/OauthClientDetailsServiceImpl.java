@@ -6,6 +6,7 @@ import com.example.entity.OauthClientDetails;
 import com.example.mapper.OauthClientDetailsMapper;
 import com.example.service.IOauthClientDetailsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import java.util.UUID;
  * @since 2023-01-13
  */
 @Service
+@Slf4j
 public class OauthClientDetailsServiceImpl extends ServiceImpl<OauthClientDetailsMapper, OauthClientDetails> implements IOauthClientDetailsService {
 
     @Autowired
@@ -46,6 +48,7 @@ public class OauthClientDetailsServiceImpl extends ServiceImpl<OauthClientDetail
         clientDetails.setClientSecret(passwordEncoder.encode(clientSecret));
 
         oauthClientDetailsMapper.insert(clientDetails);
+        log.info("create:插入成功");
         return null;
     }
 
