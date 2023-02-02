@@ -169,31 +169,40 @@
 
     <build>
         <plugins>
-            <!-- 使用maven-assembly-plugin插件打包 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.2.0</version>
-               <configuration>
-                   <archive>
-                         <manifest>
-                           <mainClass>com.example.OauthServerApplication</mainClass>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libs/</classpathPrefix>
+                            <mainClass>
+                                com.example.OauthServerApplication
+                            </mainClass>
                         </manifest>
-                   </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    </archive>
                 </configuration>
-               <executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
                     <execution>
-                        <id>make-assembly</id>
-                       <phase>package</phase>
-                         <goals>
-                           <goal>single</goal>
-                         </goals>
-                     </execution>
-                 </executions>
-             </plugin>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/libs
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
