@@ -1,7 +1,7 @@
 package com.example.controller;
 
 
-import com.example.consts.ResourceUrlConsts;
+import com.example.consts.GlobalConsts;
 import com.example.dto.ServerResp;
 import com.example.dto.TokenParamDto;
 import com.example.service.LoginService;
@@ -39,11 +39,11 @@ public class LoginController {
     public Object logout(HttpServletRequest request) {
         try {
             String authorization = request.getHeader("token");
-            if (StringUtils.isBlank(authorization) || !authorization.contains(ResourceUrlConsts.AUTHORIZATION_BEARER)) {
+            if (StringUtils.isBlank(authorization) || !authorization.contains(GlobalConsts.AUTHORIZATION_BEARER)) {
                 return new ServerResp("缺少授权信息,退出登录失败", ServerResp.ERROR_CODE);
             }
 
-            String token = authorization.substring(ResourceUrlConsts.AUTHORIZATION_BEARER.length() + 1);
+            String token = authorization.substring(GlobalConsts.AUTHORIZATION_BEARER.length() + 1);
             if (StringUtils.isBlank(token)) {
                 return new ServerResp("缺少授权信息,退出登录失败", ServerResp.ERROR_CODE);
             }

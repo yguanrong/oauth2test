@@ -27,8 +27,4 @@ public interface ResourceUrlConsts {
      */
     String AUTH_INFO_URL = "/resource/authInfo";
 
-    /**
-     * 授权信息token信息
-     */
-    String AUTHORIZATION_BEARER = "Bearer";
 }

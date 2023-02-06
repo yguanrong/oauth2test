@@ -1,14 +1,13 @@
 package com.example.config.oauth;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.dto.Operation;
-import com.example.dto.UserArea;
-import com.example.dto.UserInfo;
-import com.example.dto.UserRoleInfo;
+import com.example.consts.GlobalConsts;
+import com.example.dto.*;
 import com.example.entity.SysUser;
 import com.example.mapper.SysUserMapper;
 import com.example.service.UserService;
 import com.google.gson.Gson;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -52,7 +51,8 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
-//        long expireTime = oAuth2AccessToken.getExpiration().getTime() - System.currentTimeMillis();
+        long expireTime = oAuth2AccessToken.getExpiration().getTime();
+        OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
 //
 //        // 获取用户授权信息
 //        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
@@ -66,13 +66,23 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 //        info.put("userInfo",userInfo);
 //        ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
 
-        Set<String> responseTypes = oAuth2Authentication.getOAuth2Request().getResponseTypes();
         Map<String,Object> additionalInfo = new HashMap<>(1);
-        if (responseTypes.contains("id_token")){
-            SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
-            String idToken = "asfsdgsdgdfh";
-            additionalInfo.put("id_token", idToken);
-        }
+        String nonce = oAuth2Authentication.getOAuth2Request().getRequestParameters().get(GlobalConsts.NONCE);
+        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+        String idToken = OidcIdTokenBuilder.builder()
+                .signWith(SignatureAlgorithm.HS256,"xxxx")
+                .setIssuer(GlobalConsts.ISSUER)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(expireTime))
+                .setSubject(String.valueOf(user.getId()))
+                .setName(user.getUsername())
+                .setLoginName(user.getUsername())
+                .setPicture("http://baidu.pictrue.com/123.png")
+                .setAudience(authorizationRequest.getClientId())
+                .setNonce(nonce)
+                .build();
+
+        additionalInfo.put("id_token", idToken);
 
         ((DefaultOAuth2AccessToken)oAuth2AccessToken).setAdditionalInformation(additionalInfo);
         return oAuth2AccessToken;

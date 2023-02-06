@@ -1,5 +1,8 @@
 package com.example;
 
+import com.alibaba.fastjson2.JSONObject;
+import com.example.consts.GlobalConsts;
+import com.example.dto.OidcIdTokenBuilder;
 import com.example.entity.SysUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
@@ -75,23 +78,25 @@ public class JWTTest {
     @Test
     public void testParseToken(){
 
-        String token = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4ODg4Iiwic3ViIjoiUm9zZSIsImlhdCI6MTY3Mjk4NDYwOSwiZXhwIjoxNjcyOTg0NjY5fQ.bpLaYkjUWMnss5AFrHlBj5hX-_7T1_wD94gTFgqYJ8E";
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJpbnRlbGxpZi5jb20iLCJpYXQiOjE2NzU2NTg5MTEsImV4cCI6MTY3NTY1OTIxMCwic3ViIjoiMSIsIm5hbWUiOiJyb3NlIiwibG9naW5fbmFtZSI6InJvZGVMb2dpbiIsInBpY3R1cmUiOiJoYXNmZGhhc2ZkaCIsImF1ZCI6InN1YlBsYXQiLCJub25jZSI6IjEyM3NkIn0.kjZdlWtJ78mgjZ6wd2f9lWIe4HP59OftK-yZdibE1W8";
 
         Claims claims = Jwts.parser()
                 .setSigningKey("xxxx")
                 .parseClaimsJws(token)
                 .getBody();
 
-        System.out.println("claims.getId() = " + claims.getId());
-
-        System.out.println("claims.getId() = " + claims.getSubject());
-
-        Object role = claims.get("role");
-        System.out.println("role = " + role);
-
-        System.out.println("签发时间 = " + claims.getIssuedAt());
-        System.out.println("过期时间 = " + claims.getExpiration());
-        System.out.println("当前时间 = " + new Date());
+        String s = JSONObject.toJSONString(claims);
+        System.out.println("s = " + s);
+//        System.out.println("claims.getId() = " + claims.getId());
+//
+//        System.out.println("claims.getId() = " + claims.getSubject());
+//
+//        Object role = claims.get("role");
+//        System.out.println("role = " + role);
+//
+//        System.out.println("签发时间 = " + claims.getIssuedAt());
+//        System.out.println("过期时间 = " + claims.getExpiration());
+//        System.out.println("当前时间 = " + new Date());
 
     }
 
@@ -129,4 +134,33 @@ public class JWTTest {
         });
 
     }
+
+    @Test
+    public void testIdToken(){
+        long exp = System.currentTimeMillis() + 5*60*1000;
+        String idToken = OidcIdTokenBuilder.builder()
+                .signWith(SignatureAlgorithm.HS256,"xxxx")
+                .setIssuer(GlobalConsts.ISSUER)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(exp))
+                .setSubject(String.valueOf(1))
+                .setName("rose")
+                .setLoginName("rodeLogin")
+                .setPicture("http://baidu.pictrue.com/123.png")
+                .setAudience("subPlat")
+                .setNonce("123sd")
+                .build();
+
+        System.out.println("idToken = " + idToken);
+
+        System.out.println(" ======================================= ");
+
+        String[] strings = idToken.split("\\.");
+
+        System.out.println(Base64Codec.BASE64.decodeToString(strings[0]));
+        System.out.println(Base64Codec.BASE64.decodeToString(strings[1]));
+        //无法解密
+        System.out.println(Base64Codec.BASE64.decodeToString(strings[2]));
+    }
+
 }
