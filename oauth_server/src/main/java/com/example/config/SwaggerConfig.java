@@ -33,6 +33,7 @@ public class SwaggerConfig {
                 .paths(PathSelectors.any())
                 .build()
                 .groupName("auth")
+                .globalOperationParameters(setHeaderToken())
                 .apiInfo(apiInfo());
     }
 

@@ -58,7 +58,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 //        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
 //
 //        // 把token：UserInfo 保存到redis
-//        storeTokenUserInfoToRedis(oAuth2AccessToken,oAuth2Authentication, expireTime, userInfo);
+        storeTokenUserInfoToRedis(oAuth2AccessToken, expireTime);
 //
 //        // token增强器，增强内容只存在redis中，不返回到前端
 //        Map<String,Object> info = new HashMap<>();
@@ -92,25 +92,17 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     /**
      * 保存token和用户信息到redis
-     * @param oAuth2Authentication
      * @param expireTime
-     * @param userInfo
      */
-    private void storeTokenUserInfoToRedis(OAuth2AccessToken oAuth2AccessToken,OAuth2Authentication oAuth2Authentication, long expireTime, UserInfo userInfo) {
-        OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
+    private void storeTokenUserInfoToRedis(OAuth2AccessToken oAuth2AccessToken,long expireTime) {
 
-        userInfo.getUserVo().setClientId(authorizationRequest.getClientId());
         String token = oAuth2AccessToken.getValue();
-        Gson gson = new Gson();
-        String data = gson.toJson(userInfo);
+
         ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
-        Boolean handle = valueOperations.setIfAbsent(token, data);
-        log.info("存储用户登录信息，账号：{}，token={},success={}", userInfo.getUserVo().getUsername(), token, handle);
+        Boolean handle = valueOperations.setIfAbsent(token, token);
+        log.info("存储用户登录信息，token={},success={}",  token, handle);
 
         if (handle!= null && handle) {
-            //存储用户和token的关系
-            String key = userInfo.getUserVo().getUsername() + "_" + 0L + "_" +authorizationRequest.getClientId();
-            valueOperations.set(key, token, expireTime, TimeUnit.MILLISECONDS);
             //存储token对应的用户信息
             valueOperations.getOperations().expire(token, expireTime, TimeUnit.MILLISECONDS);
         }
