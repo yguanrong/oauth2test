@@ -13,9 +13,9 @@
         <version>2.2.6.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
+    <groupId>com.intellif</groupId>
     <artifactId>springboot_security_oauth</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>springboot_security_oauth</name>
     <description>Demo project for Spring Boot</description>
 
