@@ -1,0 +1,3 @@
+from_image: intellif.io/ci/alpine-oraclejdk8:0.2
+#from_image: intellif.io/ci/jdk_sdc:v5
+

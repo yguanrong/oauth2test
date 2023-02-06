@@ -1,0 +1,45 @@
+variables:
+  service_name: ifaas-oauth-server
+  # cpp web
+  language: java
+  docker_type: java
+  is_image: true
+  port: 9001
+  install_dir: /opt/ifaas-oauth-server
+  dockerfile:
+    healthcheck:
+      disable: true
+  mount: /data/ifaas-oauth-server/logs:/opt/ifaas-oauth-server/logs
+
+k8s:
+  healthCheck:
+    type: tcp
+    port: 9001
+    readinessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 10
+    livenessProbe:
+      initialDelaySeconds: 35
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 10
+
+tasks:
+  - copy:
+    - src: target/api.jar
+    - dest: .
+  - copy:
+      - src: target/config/
+      - dest: .
+  - copy:
+      - src: target/bin/
+      - dest: .
+  - copy:
+      - src: target/lib/
+      - dest: ./lib
+  - copy:
+      - src: util
+      - dest: .
