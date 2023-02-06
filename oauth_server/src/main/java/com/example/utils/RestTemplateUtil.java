@@ -26,13 +26,13 @@ public class RestTemplateUtil {
 
     static {
         SimpleClientHttpRequestFactory clientHttpRequestFactory = new SimpleClientHttpRequestFactory();
-        clientHttpRequestFactory.setConnectTimeout(5 * 1000); // 超期时间设置为5s
-        clientHttpRequestFactory.setReadTimeout(5 * 1000); // 超期时间设置为5s
+        clientHttpRequestFactory.setConnectTimeout(2 * 1000); // 超期时间设置为10s
+        clientHttpRequestFactory.setReadTimeout(2 * 1000); // 超期时间设置为10s
         restTemplate = new RestTemplate(clientHttpRequestFactory);
 
         HttpsClientRequest httpsClientRequest = new HttpsClientRequest();
-        httpsClientRequest.setConnectTimeout(5 * 1000); // 超期时间设置为5s
-        httpsClientRequest.setReadTimeout(5 * 1000); // 超期时间设置为5s
+        httpsClientRequest.setConnectTimeout(2 * 1000); // 超期时间设置为10s
+        httpsClientRequest.setReadTimeout(2 * 1000); // 超期时间设置为10s
         restTemplateHttps = new RestTemplate(httpsClientRequest);
 
     }

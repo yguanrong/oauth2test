@@ -6,7 +6,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>oauth_server</module>
-        <module>oauth_client</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

@@ -45,7 +45,7 @@ public class MybatisPlusGenerator {
     private static String driverName = "com.mysql.jdbc.Driver";
     private static String url = "jdbc:mysql://localhost:3306/auth_server?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=true";
     private static String username = "root";
-    private static String password = "muyangren1234";
+    private static String password = "123456";
 
     //模块相关名称
     //controller包名

@@ -97,8 +97,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
         // 授权认证
         http.authorizeRequests()
-                // 所有请求都不需要认证
-                .anyRequest().permitAll();
+                // login.html 不需要认证
+                .antMatchers("/oauth/**","/login/**","/logout/**").permitAll()
+                // 所有请求都需要认证，必须登录之后才能访问
+                .anyRequest().authenticated()
+                .and()
+                .formLogin()
+                .permitAll();
 
         // 关闭csrf防护
         http.csrf().disable();

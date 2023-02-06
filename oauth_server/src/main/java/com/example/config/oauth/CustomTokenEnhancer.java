@@ -10,7 +10,6 @@ import com.example.mapper.SysUserMapper;
 import com.example.service.UserService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -24,10 +23,7 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
 import javax.annotation.Resource;
 import javax.swing.tree.TreeNode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -56,22 +52,33 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
-        long expireTime = oAuth2AccessToken.getExpiration().getTime() - System.currentTimeMillis();
+//        long expireTime = oAuth2AccessToken.getExpiration().getTime() - System.currentTimeMillis();
+//
+//        // 获取用户授权信息
+//        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
+//
+//        // 把token：UserInfo 保存到redis
+//        storeTokenUserInfoToRedis(oAuth2AccessToken,oAuth2Authentication, expireTime, userInfo);
+//
+//        // token增强器，增强内容只存在redis中，不返回到前端
+//        Map<String,Object> info = new HashMap<>();
+//        userInfo.setOperationList(null);
+//        info.put("userInfo",userInfo);
+//        ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
 
-        // 获取用户授权信息
-        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
+        Set<String> responseTypes = oAuth2Authentication.getOAuth2Request().getResponseTypes();
+        Map<String,Object> additionalInfo = new HashMap<>(1);
+        if (responseTypes.contains("id_token")){
+            SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+            String idToken = "asfsdgsdgdfh";
+            additionalInfo.put("id_token", idToken);
+        }
 
-        // 把token：UserInfo 保存到redis
-        storeTokenUserInfoToRedis(oAuth2AccessToken,oAuth2Authentication, expireTime, userInfo);
-
-        // token增强器，增强内容只存在redis中，不返回到前端
-        Map<String,Object> info = new HashMap<>();
-        userInfo.setOperationList(null);
-        info.put("userInfo",userInfo);
-        ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
-
+        ((DefaultOAuth2AccessToken)oAuth2AccessToken).setAdditionalInformation(additionalInfo);
         return oAuth2AccessToken;
     }
+
+
 
     /**
      * 保存token和用户信息到redis

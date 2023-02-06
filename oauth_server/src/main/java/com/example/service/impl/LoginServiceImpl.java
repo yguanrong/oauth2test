@@ -1,12 +1,10 @@
 package com.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.config.LoginEnvConfig;
 import com.example.config.oauth.CustomRedisTokenStore;
 import com.example.dto.TokenParamDto;
 import com.example.dto.UserInfo;
 import com.example.entity.OauthClientDetails;
-import com.example.entity.SysUser;
 import com.example.mapper.OauthClientDetailsMapper;
 import com.example.service.LoginService;
 import com.google.gson.Gson;
@@ -14,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -28,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class LoginServiceImpl implements LoginService {
 
-    @Autowired
-    LoginEnvConfig loginEnvConfig;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
