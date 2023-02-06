@@ -1,24 +1,17 @@
 package com.example.controller;
 
-import com.example.consts.ResourceUrlConsts;
 import com.example.dto.ServerResp;
-import com.example.dto.UserInfo;
 import com.example.entity.SysUser;
 import com.example.service.ISysUserService;
-import com.example.service.LoginService;
 import com.google.gson.Gson;
-import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -42,17 +35,16 @@ public class UserController {
      */
     @GetMapping(value = "/getCurrentUser")
     @ApiOperation(value = "获取当前用户信息",httpMethod = "GET")
-    public Object getCurrentUser(HttpServletRequest httpServletRequest) {
+    public ServerResp getCurrentUser(HttpServletRequest httpServletRequest) {
         String head = httpServletRequest.getHeader("token");
         String token = head.substring(head.indexOf("Bearer") + 7);
-        String s = redisTemplate.opsForValue().get(token);
-        if (StringUtils.isEmpty(s)) {
+        String userData = redisTemplate.opsForValue().get(token);
+        if (StringUtils.isEmpty(userData)) {
             return new ServerResp("获取用户信息失败",ServerResp.ERROR_CODE);
         }
         Gson gson = new Gson();
-        UserInfo userInfo = gson.fromJson(s, UserInfo.class);
-        userInfo.setOperationList(null);
-        return userInfo;
+        SysUser user = gson.fromJson(userData,SysUser.class);
+        return new ServerResp(user);
     }
 
     /**

@@ -3,8 +3,8 @@ package com.example.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.config.oauth.CustomRedisTokenStore;
 import com.example.dto.TokenParamDto;
-import com.example.dto.UserInfo;
 import com.example.entity.OauthClientDetails;
+import com.example.entity.SysUser;
 import com.example.mapper.OauthClientDetailsMapper;
 import com.example.service.LoginService;
 import com.google.gson.Gson;
@@ -36,18 +36,10 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void logout(String token) {
-
-        String s = redisTemplate.opsForValue().get(token);
-        Gson gson = new Gson();
-        UserInfo userInfo = gson.fromJson(s, UserInfo.class);
-
         //删除token
         redisTokenStore.removeAccessToken(token);
 
         //删除redis缓存的用户信息
-        String userName_clientId = userInfo.getUserVo().getUsername() + "_" + 0L + "_" + userInfo.getUserVo().getClientId();
-        redisTemplate.delete(userName_clientId);
-
         redisTemplate.delete(token);
 
     }
@@ -57,10 +49,9 @@ public class LoginServiceImpl implements LoginService {
         if (StringUtils.isNotEmpty(tokenParamDto.getToken())) {
             String s = redisTemplate.opsForValue().get(tokenParamDto.getToken());
             Gson gson = new Gson();
-            UserInfo userInfo = gson.fromJson(s, UserInfo.class);
+            SysUser userInfo = gson.fromJson(s, SysUser.class);
 
-            String username = userInfo.getUserVo().getUsername();
-            String clientId = userInfo.getUserVo().getClientId();
+            String clientId = userInfo.getClientId();
 
             // 获取clientId对应的token有效期
             LambdaQueryWrapper<OauthClientDetails> queryWrapper = new LambdaQueryWrapper<>();
@@ -72,8 +63,6 @@ public class LoginServiceImpl implements LoginService {
             boolean resetLoginExpired = redisTokenStore.refreshLoginExpired(tokenParamDto.getToken(), tokenExpireTime);
             if (resetLoginExpired) {
                 //重新设置redis的用户信息过期时间
-                String userName_clientId = username + "_" + 0L + "_" + clientId;
-                redisTemplate.expire(userName_clientId, tokenExpireTime, TimeUnit.SECONDS);
                 redisTemplate.expire(tokenParamDto.getToken(), tokenExpireTime, TimeUnit.SECONDS);
             }
         }

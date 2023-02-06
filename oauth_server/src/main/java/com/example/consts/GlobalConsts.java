@@ -21,4 +21,9 @@ public interface GlobalConsts {
      */
     String NONCE = "nonce";
 
+    /**
+     * jwt加密的盐值
+     */
+    String JWT_SALT = "intellif1234";
+
 }

@@ -1,6 +1,5 @@
 package com.example.config.oauth;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.consts.GlobalConsts;
 import com.example.dto.*;
 import com.example.entity.SysUser;
@@ -8,23 +7,18 @@ import com.example.mapper.SysUserMapper;
 import com.example.service.UserService;
 import com.google.gson.Gson;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.netty.handler.codec.base64.Base64Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
-import javax.annotation.Resource;
-import javax.swing.tree.TreeNode;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -53,24 +47,22 @@ public class CustomTokenEnhancer implements TokenEnhancer {
     public OAuth2AccessToken enhance(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
         long expireTime = oAuth2AccessToken.getExpiration().getTime();
         OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
-//
-//        // 获取用户授权信息
-//        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
-//
-//        // 把token：UserInfo 保存到redis
-        storeTokenUserInfoToRedis(oAuth2AccessToken, expireTime);
-//
-//        // token增强器，增强内容只存在redis中，不返回到前端
-//        Map<String,Object> info = new HashMap<>();
-//        userInfo.setOperationList(null);
-//        info.put("userInfo",userInfo);
-//        ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
+
+        // 获取用户信息
+        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+        // 添加当前登录的客户端
+        user.setClientId(authorizationRequest.getClientId());
+
+        // 把token：UserInfo 保存到redis
+        storeTokenUserInfoToRedis(oAuth2AccessToken, user);
 
         Map<String,Object> additionalInfo = new HashMap<>(1);
         String nonce = oAuth2Authentication.getOAuth2Request().getRequestParameters().get(GlobalConsts.NONCE);
-        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+
+        // 生成id_token
         String idToken = OidcIdTokenBuilder.builder()
-                .signWith(SignatureAlgorithm.HS256,"xxxx")
+                // TODO: 加密方式和盐值 需要根据实际情况定
+                .signWith(SignatureAlgorithm.HS256, GlobalConsts.JWT_SALT)
                 .setIssuer(GlobalConsts.ISSUER)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(expireTime))
@@ -92,14 +84,17 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     /**
      * 保存token和用户信息到redis
-     * @param expireTime
+     * @param oAuth2AccessToken
+     * @param user
      */
-    private void storeTokenUserInfoToRedis(OAuth2AccessToken oAuth2AccessToken,long expireTime) {
-
+    private void storeTokenUserInfoToRedis(OAuth2AccessToken oAuth2AccessToken, SysUser user) {
+        long expireTime = oAuth2AccessToken.getExpiration().getTime() - System.currentTimeMillis();
         String token = oAuth2AccessToken.getValue();
-
+        Gson gson = new Gson();
+        String data = gson.toJson(user);
         ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
-        Boolean handle = valueOperations.setIfAbsent(token, token);
+        Boolean handle = valueOperations.setIfAbsent(token, data);
+
         log.info("存储用户登录信息，token={},success={}",  token, handle);
 
         if (handle!= null && handle) {
@@ -108,25 +103,25 @@ public class CustomTokenEnhancer implements TokenEnhancer {
         }
     }
 
-    /**
-     * 获取用户权限模块等消息，等信息
-     * @param oAuth2Authentication
-     * @return
-     */
-    private UserInfo getUserAuthInfo(OAuth2Authentication oAuth2Authentication){
-        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
-        OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserVo(user);
-
-        // 获取用户权限信息
-        UserInfo authInfo = userService.getUserAuthInfo(user.getId(), authorizationRequest.getClientId());
-        userInfo.setUserRoleInfo(authInfo.getUserRoleInfo());
-        userInfo.setOauthResources(authInfo.getOauthResources());
-        userInfo.setOperationList(authInfo.getOperationList());
-        userInfo.setUserAreaList(authInfo.getUserAreaList());
-
-        return userInfo;
-    }
+//    /**
+//     * 获取用户权限模块等消息，等信息
+//     * @param oAuth2Authentication
+//     * @return
+//     */
+//    private SysUser getUserAuthInfo(OAuth2Authentication oAuth2Authentication){
+//        SysUser user = (SysUser) oAuth2Authentication.getPrincipal();
+//        OAuth2Request authorizationRequest = oAuth2Authentication.getOAuth2Request();
+//        UserInfo userInfo = new UserInfo();
+//        userInfo.setUserVo(user);
+//
+//        // 获取用户权限信息
+//        UserInfo authInfo = userService.getUserAuthInfo(user.getId(), authorizationRequest.getClientId());
+//        userInfo.setUserRoleInfo(authInfo.getUserRoleInfo());
+//        userInfo.setOauthResources(authInfo.getOauthResources());
+//        userInfo.setOperationList(authInfo.getOperationList());
+//        userInfo.setUserAreaList(authInfo.getUserAreaList());
+//
+//        return userInfo;
+//    }
 
 }
