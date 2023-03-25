@@ -59,15 +59,15 @@ public class CustomTokenEnhancer implements TokenEnhancer {
         long expireTime = oAuth2AccessToken.getExpiration().getTime() - System.currentTimeMillis();
 
         // 获取用户授权信息
-        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
+//        UserInfo userInfo = getUserAuthInfo(oAuth2Authentication);
 
         // 把token：UserInfo 保存到redis
-        storeTokenUserInfoToRedis(oAuth2AccessToken,oAuth2Authentication, expireTime, userInfo);
+//        storeTokenUserInfoToRedis(oAuth2AccessToken,oAuth2Authentication, expireTime, userInfo);
 
         // token增强器，增强内容只存在redis中，不返回到前端
         Map<String,Object> info = new HashMap<>();
-        userInfo.setOperationList(null);
-        info.put("userInfo",userInfo);
+//        userInfo.setOperationList(null);
+//        info.put("userInfo",userInfo);
         ((DefaultOAuth2AccessToken) oAuth2AccessToken).setAdditionalInformation(info);
 
         return oAuth2AccessToken;
